@@ -1,13 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __importDefault(require("config"));
-const node_path_1 = __importDefault(require("node:path"));
-const serverConfig = {
-    PORT: config_1.default.get('PORT') || 4000,
-    TOKEN_KEY: config_1.default.get('TOKEN_KEY'),
-    dbPath: (fileName) => node_path_1.default.join(process.cwd(), 'db', fileName + '.json')
+exports.serverConfig = void 0;
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
+if (!process.env.TOKEN_KEY) {
+    throw new Error("TOKEN_KEY is not defined in .env file");
+}
+exports.serverConfig = {
+    PORT: parseInt(process.env.PORT || "4000", 10),
+    TOKEN_KEY: process.env.TOKEN_KEY
 };
-exports.default = serverConfig;

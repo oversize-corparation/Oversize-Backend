@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ServerError = exports.CliesntError = void 0;
-class CliesntError extends Error {
+exports.ServerError = exports.ClientError = void 0;
+class ClientError extends Error {
     constructor(message, status) {
         super(message);
         this.message = `ClientError ${message}`;
         this.status = status;
     }
 }
-exports.CliesntError = CliesntError;
+exports.ClientError = ClientError;
 class ServerError extends Error {
     constructor(message) {
         super(message);
