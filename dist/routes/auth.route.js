@@ -10,3 +10,5 @@ exports.authRouter = (0, express_1.Router)();
 exports.authRouter.get('/', auth_controller_1.default.GET_ALL);
 exports.authRouter.post('/register', auth_controller_1.default.REGISTER);
 exports.authRouter.post('/login', auth_controller_1.default.LOGIN);
+exports.authRouter.post('/send-otp', auth_controller_1.default.SEND_OTP);
+exports.authRouter.post('/verify-otp', auth_controller_1.default.VERIFY_OTP);

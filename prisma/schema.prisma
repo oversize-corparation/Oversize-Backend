@@ -38,3 +38,15 @@ model Users {
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
 }
 
+model Otp {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String @unique
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  is_invalid  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+

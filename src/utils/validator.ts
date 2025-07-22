@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const codeOtpPattern = /^[1-9][0-9]{5}$/;
 
 const lastname = Joi.string().max(100).min(3).required().messages({
     'string.base': 'lastname must be a string.',
@@ -51,3 +52,19 @@ const verify_email = Joi.boolean().messages({
 })
 export const userValidator = Joi.object({ lastname, firstname, email, password, phone_number, avatar_url, verify_email });
 export const loginValidator = Joi.object({ email, password });
+
+// OTP
+const emailOtp = Joi.string().email().pattern(emailPattern).required().messages({
+    'string.base': 'Email must be a string.',
+    'string.empty': 'Email can not be a empty.',
+    'string.email': 'Please enter a valid email address.',
+    'string.pattern.base': 'Email does not match the required pattern.',
+    'any.required': 'Email is required' 
+});
+const codeOtp = Joi.string().pattern(codeOtpPattern).required().messages({
+    'string.empty': 'codeOtp can not be a empty.',
+    'string.pattern.base': 'codeOtp does not match the required pattern.',
+    'any.required': 'codeOtp is required' 
+})
+export const verifyOtpValidator = Joi.object({ email:emailOtp, code:codeOtp })
+export const sendOtpValidator = Joi.object({ email:emailOtp })

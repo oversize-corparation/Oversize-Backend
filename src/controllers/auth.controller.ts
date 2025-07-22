@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "../generated/prisma";
-import { loginValidator, userValidator } from "../utils/validator";
+import { loginValidator, sendOtpValidator, userValidator, verifyOtpValidator } from "../utils/validator";
 import { ClientError } from "../utils/error";
 import { tokenService } from "../lib/jwt";
 import { hashService } from "../lib/hash";
 import { UserRegisterInterface } from "../types/userRegister.dto"
 import { UserLoginInterface } from "../types/userLogin.dto";
+import { sendOTP } from "../lib/mailer";
 const { createHash, comparePassword } = hashService;
 const { createToken } = tokenService;
 const prisma = new PrismaClient();
@@ -77,5 +78,63 @@ export default {
         catch(error){
             next(error);
         }
-    }
+    },
+    SEND_OTP: async (req:Request, res:Response, next:NextFunction) => {
+        try{
+            const { email } = req.body;
+            const validator = sendOtpValidator.validate({ email })
+            if(validator.error) throw new ClientError(validator.error.message, 400);
+
+            const otp = await sendOTP(email);
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 daqiqa
+
+            await prisma.otp.create({
+                data: {
+                    email: email,
+                    code: otp,
+                    expiresAt: expiresAt,
+                }
+            });
+
+            return res.status(200).json({ message: "OTP yuborildi", status: 200 });
+        }
+        catch(error){
+            next(error);
+        }
+    },
+    VERIFY_OTP: async function(req:Request, res:Response, next:NextFunction){
+        try{
+            const { email, code } = req.body;
+            const validator = verifyOtpValidator.validate({ email, code })
+            if(validator.error) throw new ClientError(validator.error.message, 400);
+            const otpEntry = await prisma.otp.findFirst({
+                where: { email, code }
+            });
+
+            const user = await prisma.users.findFirst({
+                where: { email }
+            });
+
+            if (!(user && otpEntry && (otpEntry.expiresAt > new Date()))) {
+                if(otpEntry) {
+                    await prisma.otp.update({
+                        where: { id: otpEntry.id },
+                        data: { is_invalid: true }
+                    });
+                }
+                 return res.status(401).json({ message: "Kod noto'g'ri yoki muddati tugagan" });
+            }
+            
+            await prisma.otp.update({
+                where: { id: otpEntry.id },
+                data: { verified: true }
+            });
+            res.status(200).json({message: 'User successfully logged in', status: 200, accessToken: createToken({user_id: user.id, userAgent: req.headers['user-agent']})})
+        }
+        catch(error){
+            next(error);
+        }
+    },
+
+
 }
