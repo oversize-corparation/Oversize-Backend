@@ -71,7 +71,7 @@ export default {
                 where:{email: user.email },
                 select:{email: true, password: true, id: true}
             })
-            if(!isExists) throw new ClientError("Invalid email or password", 400);
+            if(!isExists) throw new ClientError("Invalid email or password", 400) ;
             if(!(await comparePassword(user.password, isExists.password))) throw new ClientError('Invalid email or password', 400);
             res.status(200).json({message: 'User successfully logged in', status: 200, accessToken: createToken({user_id:isExists.id, userAgent: req.headers['user-agent']})})
         }
