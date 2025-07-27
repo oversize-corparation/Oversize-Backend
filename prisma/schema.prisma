@@ -14,7 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Roles {
   id    Int     @id @default(autoincrement())
   name  String  @unique
@@ -22,31 +21,33 @@ model Roles {
 }
 
 model Users {
-  id           Int      @id @default(autoincrement())
-  firstname    String
-  lastname     String
-  email        String   @unique
-  phone_number String   @unique
-  is_active    Boolean  @default(false)
-  role_id      Int
-  password     String
-  avatar_url   String?  // Nullable
-  verify_email Boolean  @default(false)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id                Int       @id @default(autoincrement())
+  firstname         String
+  lastname          String
+  email             String    @unique
+  phone_number      String    @unique
+  is_active         Boolean   @default(false)
+  role_id           Int
+  password          String
+  avatar_url        String? // Nullable
+  login_attempts    Int?      @default(0)
+  last_failed_login DateTime?
+  locked_until      DateTime?
+  verify_email      Boolean   @default(false)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
 
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
 }
 
 model Otp {
-  id        Int      @id @default(autoincrement())
-  email     String
-  code      String @unique
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-  is_invalid  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  email      String
+  code       String   @unique
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  is_invalid Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   @@index([email])
 }
-
