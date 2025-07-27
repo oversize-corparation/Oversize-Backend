@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../generated/prisma");
 const validator_1 = require("../utils/validator");
@@ -8,6 +11,10 @@ const hash_1 = require("../lib/hash");
 const mailer_1 = require("../lib/mailer");
 const { createHash, comparePassword } = hash_1.hashService;
 const { createToken } = jwt_1.tokenService;
+const dayjs_1 = __importDefault(require("dayjs"));
+const config_1 = require("../config");
+const relativeTime_1 = __importDefault(require("dayjs/plugin/relativeTime"));
+dayjs_1.default.extend(relativeTime_1.default);
 const prisma = new prisma_1.PrismaClient();
 exports.default = {
     GET_ALL: async function (req, res, next) {
@@ -27,12 +34,12 @@ exports.default = {
                 throw new error_1.ClientError(validator.error.message, 400);
             const isExists = await prisma.users.findUnique({
                 where: { email: user.email },
-                select: { email: true }
+                select: { email: true },
             });
             if (isExists)
                 throw new error_1.ClientError("This user already exists", 400);
             if (user.role_id && user.role_id == 1)
-                throw new error_1.ClientError('Forbidden !', 403);
+                throw new error_1.ClientError("Forbidden !", 403);
             user.role_id = user.role_id || 2;
             user.password = await createHash(user.password);
             const newUser = await prisma.users.create({
@@ -43,11 +50,18 @@ exports.default = {
                     password: user.password,
                     phone_number: user.phone_number,
                     avatar_url: user.avatar_url,
-                    role_id: user.role_id
-                }
+                    role_id: user.role_id,
+                },
             });
             console.log(newUser.id);
-            res.status(201).json({ message: 'User successfully registered', status: 201, accessToken: createToken({ user_id: newUser.id, userAgent: req.headers['user-agent'] }) });
+            res.status(201).json({
+                message: "User successfully registered",
+                status: 201,
+                accessToken: createToken({
+                    user_id: newUser.id,
+                    userAgent: req.headers["user-agent"],
+                }),
+            });
         }
         catch (error) {
             next(error);
@@ -57,20 +71,58 @@ exports.default = {
         try {
             const user = {
                 email: req.body.email.trim(),
-                password: req.body.password.trim()
+                password: req.body.password.trim(),
             };
             const validator = validator_1.loginValidator.validate(user);
             if (validator.error)
                 throw new error_1.ClientError(validator.error.message, 400);
             const isExists = await prisma.users.findUnique({
                 where: { email: user.email },
-                select: { email: true, password: true, id: true }
             });
             if (!isExists)
                 throw new error_1.ClientError("Invalid email or password", 400);
-            if (!(await comparePassword(user.password, isExists.password)))
-                throw new error_1.ClientError('Invalid email or password', 400);
-            res.status(200).json({ message: 'User successfully logged in', status: 200, accessToken: createToken({ user_id: isExists.id, userAgent: req.headers['user-agent'] }) });
+            // ✅ Account locked tekshiruv
+            if (isExists.locked_until && (0, dayjs_1.default)().isBefore(isExists.locked_until)) {
+                const waitTime = (0, dayjs_1.default)(isExists.locked_until).diff((0, dayjs_1.default)(), "second");
+                throw new error_1.ClientError(`Account is locked. Try again after ${waitTime} seconds.`, 403);
+            }
+            // ✅ Parolni tekshirish
+            const isPasswordCorrect = await comparePassword(user.password, isExists.password);
+            if (!isPasswordCorrect) {
+                const updatedAttempts = (isExists.login_attempts || 0) + 1;
+                const updateData = {
+                    login_attempts: updatedAttempts,
+                    last_failed_login: new Date(),
+                };
+                // ❌ 5 martadan ko'p bo‘lsa — 30 sekund blok
+                if (updatedAttempts >= config_1.waitConfig.MAX_FAILED_ATTEMPTS) {
+                    updateData.locked_until = (0, dayjs_1.default)()
+                        .add(config_1.waitConfig.LOCK_TIME_SECONDS, "second")
+                        .toDate();
+                }
+                await prisma.users.update({
+                    where: { email: user.email },
+                    data: updateData,
+                });
+                throw new error_1.ClientError("Invalid email or password", 400);
+            }
+            // ✅ Muvaffaqiyatli login — urinishlarni tozalash
+            await prisma.users.update({
+                where: { email: user.email },
+                data: {
+                    login_attempts: 0,
+                    last_failed_login: null,
+                    locked_until: null,
+                },
+            });
+            res.status(200).json({
+                message: "User successfully logged in",
+                status: 200,
+                accessToken: createToken({
+                    user_id: isExists.id,
+                    userAgent: req.headers["user-agent"],
+                }),
+            });
         }
         catch (error) {
             next(error);
@@ -89,7 +141,7 @@ exports.default = {
                     email: email,
                     code: otp,
                     expiresAt: expiresAt,
-                }
+                },
             });
             return res.status(200).json({ message: "OTP yuborildi", status: 200 });
         }
@@ -104,25 +156,34 @@ exports.default = {
             if (validator.error)
                 throw new error_1.ClientError(validator.error.message, 400);
             const otpEntry = await prisma.otp.findFirst({
-                where: { email, code }
+                where: { email, code },
             });
             const user = await prisma.users.findFirst({
-                where: { email }
+                where: { email },
             });
-            if (!(user && otpEntry && (otpEntry.expiresAt > new Date()))) {
+            if (!(user && otpEntry && otpEntry.expiresAt > new Date())) {
                 if (otpEntry) {
                     await prisma.otp.update({
                         where: { id: otpEntry.id },
-                        data: { is_invalid: true }
+                        data: { is_invalid: true },
                     });
                 }
-                return res.status(401).json({ message: "Kod noto'g'ri yoki muddati tugagan" });
+                return res
+                    .status(401)
+                    .json({ message: "Kod noto'g'ri yoki muddati tugagan" });
             }
             await prisma.otp.update({
                 where: { id: otpEntry.id },
-                data: { verified: true }
+                data: { verified: true },
             });
-            res.status(200).json({ message: 'User successfully logged in', status: 200, accessToken: createToken({ user_id: user.id, userAgent: req.headers['user-agent'] }) });
+            res.status(200).json({
+                message: "User successfully logged in",
+                status: 200,
+                accessToken: createToken({
+                    user_id: user.id,
+                    userAgent: req.headers["user-agent"],
+                }),
+            });
         }
         catch (error) {
             next(error);
