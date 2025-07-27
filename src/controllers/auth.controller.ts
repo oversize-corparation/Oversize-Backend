@@ -15,6 +15,7 @@ import { sendOTP } from "../lib/mailer";
 const { createHash, comparePassword } = hashService;
 const { createToken } = tokenService;
 import dayjs from "dayjs";
+import { waitConfig } from "../config";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 const prisma = new PrismaClient();
@@ -73,7 +74,7 @@ export default {
   },
   LOGIN: async function (req: Request, res: Response, next: NextFunction) {
     try {
-      const user: UserLoginInterface = {
+      const user = {
         email: req.body.email.trim(),
         password: req.body.password.trim(),
       };
@@ -87,7 +88,7 @@ export default {
 
       if (!isExists) throw new ClientError("Invalid email or password", 400);
 
-      // ✅ LOCK CHECK
+      // ✅ Account locked tekshiruv
       if (isExists.locked_until && dayjs().isBefore(isExists.locked_until)) {
         const waitTime = dayjs(isExists.locked_until).diff(dayjs(), "second");
         throw new ClientError(
@@ -96,7 +97,7 @@ export default {
         );
       }
 
-      // ✅ CHECK PASSWORD
+      // ✅ Parolni tekshirish
       const isPasswordCorrect = await comparePassword(
         user.password,
         isExists.password
@@ -110,17 +111,10 @@ export default {
           last_failed_login: new Date(),
         };
 
-        const MAX_FAILED_ATTEMPTS = parseInt(
-          process.env.MAX_FAILED_ATTEMPTS || "5"
-        );
-        const LOCK_TIME_SECONDS = parseInt(
-          process.env.LOCK_TIME_SECONDS || "30"
-        );
-
-        // agar urinishlar limiti oshsa => lock
-        if (updatedAttempts >= MAX_FAILED_ATTEMPTS) {
+        // ❌ 5 martadan ko'p bo‘lsa — 30 sekund blok
+        if (updatedAttempts >= waitConfig.MAX_FAILED_ATTEMPTS) {
           updateData.locked_until = dayjs()
-            .add(LOCK_TIME_SECONDS, "second")
+            .add(waitConfig.LOCK_TIME_SECONDS, "second")
             .toDate();
         }
 
@@ -132,7 +126,7 @@ export default {
         throw new ClientError("Invalid email or password", 400);
       }
 
-      // ✅ Successful login => reset attempts and unlock
+      // ✅ Muvaffaqiyatli login — urinishlarni tozalash
       await prisma.users.update({
         where: { email: user.email },
         data: {
