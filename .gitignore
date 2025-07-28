@@ -4,5 +4,6 @@
 
 /src/generated/prisma
 
-/.env
+# Environment files
+.env
 
