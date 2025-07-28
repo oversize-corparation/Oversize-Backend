@@ -29,8 +29,114 @@ export default {
       next(error);
     }
   },
-  REGISTER: async function (req: Request, res: Response, next: NextFunction) {
+
+  SIGN_IN_GOOGLE: async function (req: Request, res: Response, next: NextFunction) {
     try {
+      const secretDatas:{client_id:string, redirect_uri:string} = {
+        client_id: process.env.GOOGLE_CLIENT_ID_DEV!,
+        redirect_uri: process.env.GOOGLE_CALLBACK_URL!,
+      }
+      const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      new URLSearchParams({
+        response_type: 'code',
+        scope: 'openid email profile',
+        access_type: 'offline',
+        prompt: 'consent',
+        ...secretDatas
+      }).toString();
+    // Brauzerga redirect qilinadi
+    res.redirect(redirectUrl);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  CALLBACK_GOOGLE: async function (req: Request, res: Response, next: NextFunction) {
+    try {
+    const { code } = req.query;
+    const secretDatas:{client_id:string, redirect_uri:string, client_secret:string} = {
+        client_id: process.env.GOOGLE_CLIENT_ID_DEV!,
+        redirect_uri: process.env.GOOGLE_CALLBACK_URL!,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET_DEV!
+    }
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        code: code as string,     
+        grant_type: 'authorization_code',
+        ...secretDatas
+      }).toString()
+    });
+    const tokenData = await tokenRes.json();
+    const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`
+      }
+    });
+
+    const user = await userInfoRes.json();
+
+    if(!user.verified_email) throw new ClientError("Something went wrong with your gmail account!", 400);
+      
+    const isExists = await prisma.users.findUnique({
+        where: { email: user.email }
+    });
+
+      if(!isExists) {
+        user.role_id = user.role_id || 2;
+        const newUser = await prisma.users.create({
+          data: {
+            firstname: user.given_name,
+            lastname: user.family_name,
+            email: user.email,
+            password: null,
+            phone_number: '',
+            avatar_url: user.picture,
+            role_id: user.role_id,
+            is_google_account: true
+          },
+        });
+
+        res.status(201).json({
+          message: "User successfully registered",
+          status: 201,
+          accessToken: createToken({
+            user_id: newUser.id,
+            userAgent: req.headers["user-agent"],
+          }),
+        });
+      } else {
+          await prisma.users.update({
+            where: { email: user.email },
+            data: {
+              login_attempts: 0,
+              last_failed_login: null,
+              locked_until: null,
+            },
+          });
+          res.status(201).json({
+            message: "User successfully logged in",
+            status: 201,
+            accessToken: createToken({
+              user_id: isExists.id,
+              userAgent: req.headers["user-agent"],
+            }),
+          });
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+  
+  REGISTER: async function (req: Request & { file?: Express.Multer.File }, res: Response, next: NextFunction) {
+    try {
+      const buffer = req.file?.buffer;
+      const base64Image = buffer?.toString("base64");
+      const apiKey = process.env.IMGBB_API_KEY;
+      if(!buffer) { delete req.body.image }
       const user: UserRegisterInterface = req.body;
       const validator = userValidator.validate(user);
       if (validator.error) throw new ClientError(validator.error.message, 400);
@@ -45,6 +151,21 @@ export default {
         throw new ClientError("Forbidden !", 403);
       user.role_id = user.role_id || 2;
       user.password = await createHash(user.password);
+      user.avatar_url = '';
+      if(buffer){
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            image: base64Image!,
+          }),
+        });
+        const data = await response.json();
+        user.avatar_url = data.data.image.url;
+      }
+
 
       const newUser = await prisma.users.create({
         data: {
@@ -57,8 +178,6 @@ export default {
           role_id: user.role_id,
         },
       });
-
-      console.log(newUser.id);
 
       res.status(201).json({
         message: "User successfully registered",
@@ -100,7 +219,7 @@ export default {
       // ✅ Parolni tekshirish
       const isPasswordCorrect = await comparePassword(
         user.password,
-        isExists.password
+        isExists.password!
       );
 
       if (!isPasswordCorrect) {
@@ -156,7 +275,7 @@ export default {
       if (validator.error) throw new ClientError(validator.error.message, 400);
 
       const otp = await sendOTP(email);
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 daqiqa
+      const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 daqiqa
 
       await prisma.otp.create({
         data: {

@@ -25,15 +25,16 @@ model Users {
   firstname         String
   lastname          String
   email             String    @unique
-  phone_number      String    @unique
+  phone_number      String?    
   is_active         Boolean   @default(false)
   role_id           Int
-  password          String
+  password          String?
   avatar_url        String? // Nullable
   login_attempts    Int?      @default(0)
   last_failed_login DateTime?
   locked_until      DateTime?
   verify_email      Boolean   @default(false)
+  is_google_account Boolean   @default(false)
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 
