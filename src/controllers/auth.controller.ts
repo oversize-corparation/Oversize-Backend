@@ -143,8 +143,8 @@ export default {
       });
 
       if (isExists) throw new ClientError("This user already exists", 400);
-      if (user.role_id && user.role_id == 1)
-        throw new ClientError("Forbidden !", 403);
+      // if (user.role_id && user.role_id == 1)
+      //   throw new ClientError("Forbidden !", 403);
       user.role_id = user.role_id || 2;
       user.password = await createHash(user.password);
       user.avatar_url = '';
