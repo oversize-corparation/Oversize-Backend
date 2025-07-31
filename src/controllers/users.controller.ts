@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { ClientError } from "../utils/error";
 import { verifyTokenInterface } from "../types/verifyToken.dto";
 import { userValidator } from "../utils/validator";

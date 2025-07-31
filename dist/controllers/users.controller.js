@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.usersController = void 0;
-const prisma_1 = require("../generated/prisma");
+const client_1 = require("@prisma/client");
 const error_1 = require("../utils/error");
 const validator_1 = require("../utils/validator");
-const prisma = new prisma_1.PrismaClient();
+const prisma = new client_1.PrismaClient();
 exports.usersController = {
     // GET /api/users — faqat admin ko‘radi
     GET_ALL: async (req, res, next) => {

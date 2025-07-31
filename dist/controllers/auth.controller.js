@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const prisma_1 = require("../generated/prisma");
+const client_1 = require("@prisma/client");
 const validator_1 = require("../utils/validator");
 const error_1 = require("../utils/error");
 const jwt_1 = require("../lib/jwt");
@@ -15,7 +15,7 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const config_1 = require("../config");
 const relativeTime_1 = __importDefault(require("dayjs/plugin/relativeTime"));
 dayjs_1.default.extend(relativeTime_1.default);
-const prisma = new prisma_1.PrismaClient();
+const prisma = new client_1.PrismaClient();
 exports.default = {
     GET_ALL: async function (req, res, next) {
         try {
