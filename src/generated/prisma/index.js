@@ -159,7 +159,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\loyiha\\Oversize-Backend\\src\\generated\\prisma",
+      "value": "C:\\Users\\soliy\\Desktop\\Oversize-Backend\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -170,10 +170,14 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\loyiha\\Oversize-Backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\soliy\\Desktop\\Oversize-Backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -196,8 +200,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Roles {\n  id    Int     @id @default(autoincrement())\n  name  String  @unique\n  users Users[]\n}\n\nmodel Users {\n  id                Int       @id @default(autoincrement())\n  firstname         String\n  lastname          String\n  email             String    @unique\n  phone_number      String?\n  is_active         Boolean   @default(false)\n  role_id           Int\n  password          String?\n  avatar_url        String? // Nullable\n  login_attempts    Int?      @default(0)\n  last_failed_login DateTime?\n  locked_until      DateTime?\n  verify_email      Boolean   @default(false)\n  is_google_account Boolean   @default(false)\n  created_at        DateTime  @default(now())\n  updated_at        DateTime  @updatedAt\n\n  roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)\n}\n\nmodel Otp {\n  id         Int      @id @default(autoincrement())\n  email      String\n  code       String   @unique\n  expiresAt  DateTime\n  verified   Boolean  @default(false)\n  is_invalid Boolean  @default(false)\n  createdAt  DateTime @default(now())\n\n  @@index([email])\n}\n",
-  "inlineSchemaHash": "dd5d6926fa8ca5a88ded925fd7f927ef3611a524e26e0c6c975587c0f75725ca",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Roles {\n  id    Int     @id @default(autoincrement())\n  name  String  @unique\n  users Users[]\n}\n\nmodel Users {\n  id                Int       @id @default(autoincrement())\n  firstname         String\n  lastname          String\n  email             String    @unique\n  phone_number      String?\n  is_active         Boolean   @default(false)\n  role_id           Int\n  password          String?\n  avatar_url        String? // Nullable\n  login_attempts    Int?      @default(0)\n  last_failed_login DateTime?\n  locked_until      DateTime?\n  verify_email      Boolean   @default(false)\n  is_google_account Boolean   @default(false)\n  created_at        DateTime  @default(now())\n  updated_at        DateTime  @updatedAt\n\n  roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)\n}\n\nmodel Otp {\n  id         Int      @id @default(autoincrement())\n  email      String\n  code       String   @unique\n  expiresAt  DateTime\n  verified   Boolean  @default(false)\n  is_invalid Boolean  @default(false)\n  createdAt  DateTime @default(now())\n\n  @@index([email])\n}\n",
+  "inlineSchemaHash": "3376bce2803ab4a1e80a852324191c99f50688bfb47b29476dc73b0b8de57d0a",
   "copyEngine": true
 }
 
@@ -238,6 +242,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "src/generated/prisma/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");
+path.join(process.cwd(), "src/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "src/generated/prisma/schema.prisma")
