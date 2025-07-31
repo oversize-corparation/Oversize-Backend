@@ -138,8 +138,8 @@ exports.default = {
             });
             if (isExists)
                 throw new error_1.ClientError("This user already exists", 400);
-            if (user.role_id && user.role_id == 1)
-                throw new error_1.ClientError("Forbidden !", 403);
+            // if (user.role_id && user.role_id == 1)
+            //   throw new ClientError("Forbidden !", 403);
             user.role_id = user.role_id || 2;
             user.password = await createHash(user.password);
             user.avatar_url = '';
@@ -182,6 +182,7 @@ exports.default = {
     },
     LOGIN: async function (req, res, next) {
         try {
+            console.log(req.body);
             const user = {
                 email: req.body.email.trim(),
                 password: req.body.password.trim(),
@@ -247,6 +248,11 @@ exports.default = {
             const validator = validator_1.sendOtpValidator.validate({ email });
             if (validator.error)
                 throw new error_1.ClientError(validator.error.message, 400);
+            const user = await prisma.users.findFirst({
+                where: { email },
+            });
+            if (!user)
+                throw new error_1.ClientError('This user not found', 400);
             const otp = await (0, mailer_1.sendOTP)(email);
             const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 daqiqa
             await prisma.otp.create({
