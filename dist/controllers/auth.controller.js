@@ -110,14 +110,10 @@ exports.default = {
                         locked_until: null,
                     },
                 });
-                res.status(201).json({
-                    message: "User successfully logged in",
-                    status: 201,
-                    accessToken: createToken({
-                        user_id: isExists.id,
-                        userAgent: req.headers["user-agent"],
-                    }),
-                });
+                res.redirect(`http://localhost:4000?token=${createToken({
+                    user_id: isExists.id,
+                    userAgent: req.headers["user-agent"],
+                })}`);
             }
         }
         catch (error) {

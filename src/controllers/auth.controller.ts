@@ -189,6 +189,8 @@ export default {
   },
   LOGIN: async function (req: Request, res: Response, next: NextFunction) {
     try {
+      console.log(req.body);
+      
       const user = {
         email: req.body.email.trim(),
         password: req.body.password.trim(),
@@ -269,6 +271,11 @@ export default {
       const { email } = req.body;
       const validator = sendOtpValidator.validate({ email });
       if (validator.error) throw new ClientError(validator.error.message, 400);
+
+      const user = await prisma.users.findFirst({
+        where: { email },
+      });
+      if(!user) throw new ClientError('This user not found', 400);
 
       const otp = await sendOTP(email);
       const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 daqiqa

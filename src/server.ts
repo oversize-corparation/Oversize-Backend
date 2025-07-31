@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { globalError } from './middlewares/globalError';
 import { serverConfig } from './config';
 import { mainRouter } from './routes/main.routes';
+import { swaggerSetup } from './swagger';
 
 
 const app = express();
@@ -11,7 +12,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
-
+swaggerSetup(app);
 
 app.get('/', (req, res)=> res.send('<h1>Main</h1>'));
 app.use('/api', mainRouter);
