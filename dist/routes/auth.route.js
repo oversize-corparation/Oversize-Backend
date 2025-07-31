@@ -8,24 +8,17 @@ const express_1 = require("express");
 const auth_controller_1 = __importDefault(require("../controllers/auth.controller"));
 const upload_1 = require("../lib/upload");
 exports.authRouter = (0, express_1.Router)();
-/**
- * @swagger
- * /api/auth:
- *   get:
- *     summary: Hamma foydalanuvchilarni ko'rish
- *     responses:
- *       200:
- *         description: List of users
- */
 exports.authRouter.get('/', auth_controller_1.default.GET_ALL);
 /**
  * @swagger
  * /api/auth/sign-in/google:
  *   get:
- *     summary: Bu urldan faqat browser orqali boydalaning chunki so'rov yuborilsa boshqa sahifaga qayta yo'naltiradi. Bu url google orqalid register va login qilishga mo'ljallangan.
+ *     tags:
+ *       - Auth
+ *     summary: Bu urldan faqat browser orqali foydalaning chunki so'rov yuborilsa boshqa sahifaga qayta yo'naltiradi. Bu url google orqalid register va login qilishga mo'ljallangan.
  *     responses:
  *       200:
- *         description: Redirect to / (main url).
+ *         description: Google authga yo'naltiradi.
  */
 exports.authRouter.get('/sign-in/google', auth_controller_1.default.SIGN_IN_GOOGLE);
 exports.authRouter.get('/callback/google', auth_controller_1.default.CALLBACK_GOOGLE);
@@ -33,6 +26,8 @@ exports.authRouter.get('/callback/google', auth_controller_1.default.CALLBACK_GO
  * @swagger
  * /api/auth/register:
  *   post:
+ *     tags:
+ *       - Auth
  *     summary: Foydalanuvchini ro'yxatdan o'tkazish (rasm qo'yish ixtiyoriy)
  *     requestBody:
  *       required: true
@@ -66,6 +61,8 @@ exports.authRouter.post('/register', upload_1.upload.single("image"), auth_contr
  * @swagger
  * /api/auth/login:
  *   post:
+ *     tags:
+ *       - Auth
  *     summary: Login qilish
  *     requestBody:
  *       required: true
@@ -94,6 +91,8 @@ exports.authRouter.post('/login', auth_controller_1.default.LOGIN);
  * @swagger
  * /api/auth/send-otp:
  *   post:
+*     tags:
+ *       - Auth
  *     summary: OTP yuborish
  *     requestBody:
  *       required: true
@@ -118,11 +117,13 @@ exports.authRouter.post('/send-otp', auth_controller_1.default.SEND_OTP);
  * @swagger
  * /api/auth/verify-otp:
  *   post:
+*     tags:
+ *       - Auth
  *     summary: OTP orqli login qilish
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:

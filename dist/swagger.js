@@ -10,10 +10,18 @@ const options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Oversize project",
+            title: "Oversize API hujjatlari",
             version: "1.0.0",
-            description: "Ts + Express + Swagger"
-        }
+            description: "Bu yerda barcha Auth, Email yuborish, va boshqa xizmatlar bo‘yicha API hujjatlari keltirilgan."
+        },
+        tags: [
+            {
+                name: 'Auth',
+            },
+            {
+                name: 'User',
+            },
+        ],
     },
     apis: ['./src/routes/*.ts'], // Annotatsiya yozilgan fayllar yo'li
 };
