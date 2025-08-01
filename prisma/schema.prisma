@@ -37,6 +37,7 @@ model Users {
   is_google_account Boolean   @default(false)
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
+  is_deleted        Boolean   @default(false)
 
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
 }

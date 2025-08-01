@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.12.0",
+    "@prisma/client": "^6.13.0",
     "bcrypt": "^6.0.0",
     "config": "^4.0.0",
     "cors": "^2.8.5",
@@ -43,6 +43,6 @@
     "@types/nodemailer": "^6.4.17",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
-    "prisma": "^6.12.0"
+    "prisma": "^6.13.0"
   }
 }
