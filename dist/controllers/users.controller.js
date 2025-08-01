@@ -67,9 +67,9 @@ exports.usersController = {
         try {
             const tokenData = req.user;
             const userId = Number(req.params.id);
-            if (tokenData.user_id !== userId) {
-                throw new error_1.ClientError("You can only update your own profile.", 403);
-            }
+            if (!(tokenData.role_id == 1))
+                if (tokenData.user_id != userId)
+                    throw new error_1.ClientError("You can only update your own profile.", 403);
             const validation = validator_1.userValidator.validate(req.body);
             if (validation.error)
                 throw new error_1.ClientError(validation.error.message, 400);
@@ -108,9 +108,9 @@ exports.usersController = {
         try {
             const tokenData = req.user;
             const userId = Number(req.params.id);
-            if (tokenData.user_id !== userId) {
-                throw new error_1.ClientError("You can only delete your own account.", 403);
-            }
+            if (!(tokenData.role_id == 1))
+                if (tokenData.user_id != userId)
+                    throw new error_1.ClientError("You can only delete your own account.", 403);
             await prisma.users.delete({
                 where: { id: userId },
             });
