@@ -83,7 +83,7 @@ export const usersController = {
       const tokenData = req.user as verifyTokenInterface;
       const userId = Number(req.params.id);
 
-      if (tokenData.user_id !== userId) {
+      if (tokenData.user_id !== userId ) {
         throw new ClientError("You can only update your own profile.", 403);
       }
 

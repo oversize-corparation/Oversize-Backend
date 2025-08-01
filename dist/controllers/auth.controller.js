@@ -96,6 +96,7 @@ exports.default = {
                     message: "User successfully registered",
                     status: 201,
                     accessToken: createToken({
+                        role_id: newUser.role_id,
                         user_id: newUser.id,
                         userAgent: req.headers["user-agent"],
                     }),
