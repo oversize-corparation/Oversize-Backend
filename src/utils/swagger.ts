@@ -1,11 +1,30 @@
-// import swaggerUi from 'swagger-ui-express';
-// import YAML from 'yamljs';
-// import path from 'path';
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
+import { Express } from "express";
 
-// const swaggerPath = path.resolve(__dirname, '../docs/swagger.yaml');
-// const swaggerDocument = YAML.load(swaggerPath);
+const options: swaggerJsDoc.Options = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Oversize API hujjatlari",
+            version: "1.0.0",
+            description: "Bu yerda barcha Auth, Email yuborish, va boshqa xizmatlar bo‘yicha API hujjatlari keltirilgan."
+        },
+        tags: [
+            {
+            name: 'Auth',
+            },
+            {
+            name: 'User',
+            },
+        ],
+    },
 
-// export const swaggerDocs = {
-//   serve: swaggerUi.serve,
-//   setup: swaggerUi.setup(swaggerDocument),
-// };
+    apis: ['./src/routes/*.ts'], // Annotatsiya yozilgan fayllar yo'li
+}
+
+const swaggerSpec = swaggerJsDoc(options);
+
+export function swaggerSetup (app: Express){
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}

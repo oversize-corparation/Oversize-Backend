@@ -9,7 +9,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const globalError_1 = require("./middlewares/globalError");
 const config_1 = require("./config");
 const main_routes_1 = require("./routes/main.routes");
-const swagger_1 = require("./swagger");
+const swagger_1 = require("./utils/swagger");
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());

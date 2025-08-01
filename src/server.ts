@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import { globalError } from './middlewares/globalError';
 import { serverConfig } from './config';
 import { mainRouter } from './routes/main.routes';
-import { swaggerSetup } from './swagger';
+import { swaggerSetup } from './utils/swagger';
 
 
 
