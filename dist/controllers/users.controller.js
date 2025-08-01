@@ -111,8 +111,9 @@ exports.usersController = {
             if (!(tokenData.role_id == 1))
                 if (tokenData.user_id != userId)
                     throw new error_1.ClientError("You can only delete your own account.", 403);
-            await prisma.users.delete({
+            await prisma.users.update({
                 where: { id: userId },
+                data: { is_deleted: true }
             });
             res.status(200).json({
                 status: 200,

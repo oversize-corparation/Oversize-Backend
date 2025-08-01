@@ -2,6 +2,9 @@ import { tokenService } from "../lib/jwt";
 import { verifyTokenInterface } from "../types/verifyToken.dto";
 import { ClientError } from "./error";
 import { NextFunction, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function checkToken(req: Request, res: Response, next: NextFunction) {
   try {
@@ -17,6 +20,12 @@ async function checkToken(req: Request, res: Response, next: NextFunction) {
     if (req.headers["user-agent"] !== verifiyToken.userAgent) {
       throw new ClientError("Unauthorized!", 401);
     }
+
+    const users = await prisma.users.findUnique({
+      where: { id: verifiyToken.user_id },
+      select:{ id: true }
+    })
+    if(!users) throw new ClientError("Unauthorized!", 401);
 
     req.user = verifiyToken; // ✅ Bu juda muhim!
 

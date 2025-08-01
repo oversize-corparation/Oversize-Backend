@@ -20,12 +20,7 @@ export const usersController = {
     try {
       const tokenData = req.user as verifyTokenInterface;
 
-      const currentUser = await prisma.users.findUnique({
-        where: { id: tokenData.user_id },
-        select: { role_id: true },
-      });
-
-      if (!currentUser || currentUser.role_id !== 1) {
+      if (tokenData.role_id !== 1) {
         throw new ClientError("Access denied. Admin only.", 403);
       }
 
@@ -40,6 +35,7 @@ export const usersController = {
           verify_email: true,
           is_active: true,
           created_at: true,
+          is_deleted: true
         },
       });
 
@@ -55,7 +51,7 @@ export const usersController = {
       const tokenData = req.user as verifyTokenInterface;
 
       const user = await prisma.users.findUnique({
-        where: { id: tokenData.user_id },
+        where: { id: tokenData.user_id, is_deleted: false },
         select: {
           id: true,
           firstname: true,
@@ -85,8 +81,8 @@ export const usersController = {
 
       if(!(tokenData.role_id == 1)) if(tokenData.user_id != userId) throw new ClientError("You can only update your own profile.", 403);
       
-      const validation = userValidator.validate(req.body);
-      if (validation.error) throw new ClientError(validation.error.message, 400);
+      // const validation = userValidator.validate(req.body);
+      // if (validation.error) throw new ClientError(validation.error.message, 400);
 
       const updatedUser = await prisma.users.update({
         where: { id: userId },
@@ -125,10 +121,17 @@ export const usersController = {
       const tokenData = req.user as verifyTokenInterface;
       const userId = Number(req.params.id);
 
+      const user = await prisma.users.findUnique({
+        where: { id: tokenData.user_id, is_deleted: false },
+        select: { id: true },
+      });
+
+      if (!user) throw new ClientError("User not found", 404);
       if(!(tokenData.role_id == 1)) if(tokenData.user_id != userId) throw new ClientError("You can only delete your own account.", 403);
 
-      await prisma.users.delete({
+      await prisma.users.update({
         where: { id: userId },
+        data: { is_deleted: true}
       });
 
       res.status(200).json({

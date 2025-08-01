@@ -99,30 +99,28 @@ export default {
             is_google_account: true
           },
         });
-
-        res.status(201).json({
-          message: "User successfully registered",
-          status: 201,
-          accessToken: createToken({
-            role_id: newUser.role_id,
-            user_id: newUser.id,
-            userAgent: req.headers["user-agent"],
-          }),
-        });
-      } else {
-          await prisma.users.update({
-            where: { email: user.email },
-            data: {
-              login_attempts: 0,
-              last_failed_login: null,
-              locked_until: null,
-            },
-          });
-          res.redirect(`http://localhost:4000?token=${createToken({
-              role_id: isExists.role_id,
-              user_id: isExists.id,
-              userAgent: req.headers["user-agent"],
+            res.redirect(`http://localhost:4000?token=${createToken({
+                role_id: newUser.role_id,
+                user_id: newUser.id,
+                userAgent: req.headers["user-agent"],
             })}`)
+      } else {
+          if(!isExists.is_deleted){
+            await prisma.users.update({
+              where: { email: user.email },
+              data: {
+                login_attempts: 0,
+                last_failed_login: null,
+                locked_until: null,
+              },
+            });
+            res.redirect(`http://localhost:4000?token=${createToken({
+                role_id: isExists.role_id,
+                user_id: isExists.id,
+                userAgent: req.headers["user-agent"],
+            })}`)
+          }
+          else res.redirect(`http://localhost:4000/api/restoration`)
       }
     } catch (error) {
       next(error);
@@ -145,9 +143,9 @@ export default {
       });
 
       if (isExists) throw new ClientError("This user already exists", 400);
-      // if (user.role_id && user.role_id == 1)
-      //   throw new ClientError("Forbidden !", 403);
-      user.role_id = user.role_id || 2;
+      if (user.role_id && user.role_id == 1) throw new ClientError("Forbidden !", 403);
+
+      user.role_id = 2;
       user.password = await createHash(user.password);
       user.avatar_url = '';
       if(buffer){
@@ -192,8 +190,6 @@ export default {
   },
   LOGIN: async function (req: Request, res: Response, next: NextFunction) {
     try {
-      console.log(req.body);
-      
       const user = {
         email: req.body.email.trim(),
         password: req.body.password.trim(),
@@ -203,7 +199,7 @@ export default {
       if (validator.error) throw new ClientError(validator.error.message, 400);
 
       const isExists = await prisma.users.findUnique({
-        where: { email: user.email },
+        where: { email: user.email, is_deleted: false },
       });
 
       if (!isExists) throw new ClientError("Invalid email or password", 400);
@@ -299,8 +295,8 @@ export default {
   },
   VERIFY_OTP: async function (req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, code } = req.body;
-      const validator = verifyOtpValidator.validate({ email, code });
+      const { email, code, restoration } = req.body;
+      const validator = verifyOtpValidator.validate({ email, code, restoration });
       if (validator.error) throw new ClientError(validator.error.message, 400);
       const otpEntry = await prisma.otp.findFirst({
         where: { email, code },
@@ -326,6 +322,14 @@ export default {
         where: { id: otpEntry.id },
         data: { verified: true },
       });
+
+      if(restoration){
+        await prisma.users.update({
+          where: { email },
+          data: { is_deleted: false },
+        });
+      } 
+
       res.status(200).json({
         message: "User successfully logged in",
         status: 200,

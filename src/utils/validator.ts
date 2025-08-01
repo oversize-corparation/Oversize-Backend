@@ -66,5 +66,10 @@ const codeOtp = Joi.string().pattern(codeOtpPattern).required().messages({
     'string.pattern.base': 'codeOtp does not match the required pattern.',
     'any.required': 'codeOtp is required' 
 })
-export const verifyOtpValidator = Joi.object({ email:emailOtp, code:codeOtp })
+
+const restoration = Joi.boolean().required().messages({
+  'boolean.base': 'restoration must be a boolean value.',
+  'any.required': 'restoration is required.'
+});
+export const verifyOtpValidator = Joi.object({ email:emailOtp, code:codeOtp, restoration })
 export const sendOtpValidator = Joi.object({ email:emailOtp })
