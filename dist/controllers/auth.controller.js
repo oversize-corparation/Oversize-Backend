@@ -112,6 +112,7 @@ exports.default = {
                     },
                 });
                 res.redirect(`http://localhost:4000?token=${createToken({
+                    role_id: isExists.role_id,
                     user_id: isExists.id,
                     userAgent: req.headers["user-agent"],
                 })}`);
@@ -172,6 +173,7 @@ exports.default = {
                 message: "User successfully registered",
                 status: 201,
                 accessToken: createToken({
+                    role_id: newUser.role_id,
                     user_id: newUser.id,
                     userAgent: req.headers["user-agent"],
                 }),
@@ -234,6 +236,7 @@ exports.default = {
                 message: "User successfully logged in",
                 status: 200,
                 accessToken: createToken({
+                    role_id: isExists.role_id,
                     user_id: isExists.id,
                     userAgent: req.headers["user-agent"],
                 }),
@@ -300,6 +303,7 @@ exports.default = {
                 message: "User successfully logged in",
                 status: 200,
                 accessToken: createToken({
+                    role_id: user.role_id,
                     user_id: user.id,
                     userAgent: req.headers["user-agent"],
                 }),
