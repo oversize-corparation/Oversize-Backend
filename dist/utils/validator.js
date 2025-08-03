@@ -45,10 +45,26 @@ const password = joi_1.default.string().max(50).min(3).required().messages({
     'string.max': 'Password must be no longer than 50 characters.',
     'any.required': 'Password is required'
 });
+const prev_password = joi_1.default.string().max(50).min(3).messages({
+    'string.base': 'Prev password must be a string.',
+    'string.empty': 'Prev password can not be a empty.',
+    'string.min': 'Prev password must be at least 3 characters long.',
+    'string.max': 'Prev password must be no longer than 50 characters.',
+});
 const verify_email = joi_1.default.boolean().messages({
     'string.base': 'verify_email must be a boolean.',
 });
-exports.userValidator = joi_1.default.object({ lastname, firstname, email, password, phone_number, avatar_url, verify_email });
+// export const createFlowerValidator = (updateData:UserRegisterInterface) => {
+//   let validator = {};
+//   if(updateData.hasOwnProperty("lastname")) validator.lastname = lastname;
+//   if(updateData.hasOwnProperty("firstname")) validator.firstname = firstname;
+//   if(updateData.hasOwnProperty("email")) validator.email = email;
+//   if(updateData.hasOwnProperty("password")) validator.password = password;
+//   if(updateData.hasOwnProperty("phone_number")) validator.phone_number = phone_number;
+//   if(updateData.hasOwnProperty("avatar_url")) validator.avatar_url = avatar_url;
+//   return Joi.object(validator);
+// }
+exports.userValidator = joi_1.default.object({ lastname, firstname, email, password, phone_number, avatar_url, verify_email, prev_password });
 exports.loginValidator = joi_1.default.object({ email, password });
 // OTP
 const emailOtp = joi_1.default.string().email().pattern(emailPattern).required().messages({
@@ -63,5 +79,9 @@ const codeOtp = joi_1.default.string().pattern(codeOtpPattern).required().messag
     'string.pattern.base': 'codeOtp does not match the required pattern.',
     'any.required': 'codeOtp is required'
 });
-exports.verifyOtpValidator = joi_1.default.object({ email: emailOtp, code: codeOtp });
+const restoration = joi_1.default.boolean().required().messages({
+    'boolean.base': 'restoration must be a boolean value.',
+    'any.required': 'restoration is required.'
+});
+exports.verifyOtpValidator = joi_1.default.object({ email: emailOtp, code: codeOtp, restoration });
 exports.sendOtpValidator = joi_1.default.object({ email: emailOtp });

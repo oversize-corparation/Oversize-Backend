@@ -52,7 +52,7 @@ exports.authRouter.get('/callback/google', auth_controller_1.default.CALLBACK_GO
  *                 description: Profil rasmi (ixtiyoriy)
  *     responses:
  *       201:
- *         description: User successfully registered
+ *         description: We send your email identify number
  *       400:
  *         description: Client errors
  */
@@ -67,7 +67,7 @@ exports.authRouter.post('/register', upload_1.upload.single("image"), auth_contr
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -91,13 +91,13 @@ exports.authRouter.post('/login', auth_controller_1.default.LOGIN);
  * @swagger
  * /api/auth/send-otp:
  *   post:
-*     tags:
+ *     tags:
  *       - Auth
  *     summary: OTP yuborish
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -133,6 +133,10 @@ exports.authRouter.post('/send-otp', auth_controller_1.default.SEND_OTP);
  *               code:
  *                 type: string
  *                 description: User's OTP code
+ *               restoration:
+ *                 type: boolean
+ *                 default: false
+ *                 description: This area default fase if you want to restore account this area will be true
  *             required:
  *               - email
  *               - code
