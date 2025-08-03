@@ -14,16 +14,6 @@ const options = {
             version: "1.0.0",
             description: "Bu yerda barcha Auth, Email yuborish, va boshqa xizmatlar bo‘yicha API hujjatlari keltirilgan."
         },
-        servers: [
-            {
-                url: "http://localhost:4000",
-                description: "Local server"
-            },
-            {
-                url: "https://oversize-backend-fe9t.onrender.com",
-                description: "Production server"
-            }
-        ],
         tags: [
             {
                 name: 'Auth',
