@@ -15,7 +15,7 @@ const options: swaggerJsDoc.Options = {
             name: 'Auth',
             },
             {
-            name: 'User',
+            name: 'Users',
             },
         ],
     },

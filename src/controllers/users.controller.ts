@@ -41,7 +41,7 @@ export const usersController = {
         },
       });
 
-      res.status(200).json({ status: 200, users });
+      res.status(200).json(users);
     } catch (error) {
       next(error);
     }
@@ -69,7 +69,7 @@ export const usersController = {
 
       if (!user) throw new ClientError("User not found", 404);
 
-      res.status(200).json({ status: 200, user });
+      res.status(200).json(user);
     } catch (error) {
       next(error);
     }
