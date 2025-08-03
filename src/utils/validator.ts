@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { UserRegisterInterface } from '../types/userRegister.dto';
 
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const codeOtpPattern = /^[1-9][0-9]{5}$/;
@@ -47,10 +48,29 @@ const password = Joi.string().max(50).min(3).required().messages({
     'any.required': 'Password is required' 
 });
 
+const prev_password = Joi.string().max(50).min(3).messages({
+    'string.base': 'Prev password must be a string.',
+    'string.empty': 'Prev password can not be a empty.',
+    'string.min': 'Prev password must be at least 3 characters long.',
+    'string.max': 'Prev password must be no longer than 50 characters.',
+});
+
 const verify_email = Joi.boolean().messages({
     'string.base': 'verify_email must be a boolean.',
 })
-export const userValidator = Joi.object({ lastname, firstname, email, password, phone_number, avatar_url, verify_email });
+
+// export const createFlowerValidator = (updateData:UserRegisterInterface) => {
+//   let validator = {};
+//   if(updateData.hasOwnProperty("lastname")) validator.lastname = lastname;
+//   if(updateData.hasOwnProperty("firstname")) validator.firstname = firstname;
+//   if(updateData.hasOwnProperty("email")) validator.email = email;
+//   if(updateData.hasOwnProperty("password")) validator.password = password;
+//   if(updateData.hasOwnProperty("phone_number")) validator.phone_number = phone_number;
+//   if(updateData.hasOwnProperty("avatar_url")) validator.avatar_url = avatar_url;
+//   return Joi.object(validator);
+// }
+
+export const userValidator = Joi.object({ lastname, firstname, email, password, phone_number, avatar_url, verify_email, prev_password });
 export const loginValidator = Joi.object({ email, password });
 
 // OTP

@@ -7,6 +7,7 @@ export interface UserRegisterInterface {
     is_active?: boolean,
     role_id?: number,
     password: string,
+    prev_password?: string,
     avatar_url?: string,
     verify_email?: boolean,
     created_at?: Date,

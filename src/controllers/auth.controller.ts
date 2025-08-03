@@ -175,15 +175,27 @@ export default {
         },
       });
 
-      res.status(201).json({
-        message: "User successfully registered",
-        status: 201,
-        accessToken: createToken({
-          role_id: newUser.role_id,
-          user_id: newUser.id,
-          userAgent: req.headers["user-agent"],
-        }),
+      const otp = await sendOTP(newUser.email);
+      const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 daqiqa
+
+      await prisma.otp.create({
+        data: {
+          email: newUser.email,
+          code: otp,
+          expiresAt: expiresAt,
+        },
       });
+      return res.status(200).json({ message: "We send your email identify number", status: 200 });
+
+      // res.status(201).json({
+      //   message: "User successfully registered",
+      //   status: 201,
+      //   accessToken: createToken({
+      //     role_id: newUser.role_id,
+      //     user_id: newUser.id,
+      //     userAgent: req.headers["user-agent"],
+      //   }),
+      // });
     } catch (error) {
       next(error);
     }
