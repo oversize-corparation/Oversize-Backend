@@ -4,15 +4,18 @@ import { usersController } from "../controllers/users.controller";
 export const usersRouter = Router();
 
 
+
+
 /**
  * @swagger
  * /api/users:
  *   get:
  *     tags:
  *       - Users
- *     summary: Admin uchun userlarni 
+ *     summary: Faqat adminlar uchun — barcha foydalanuvchilar ro‘yxatini olish
+ *     security:
+ *       - bearerAuth: []
  *     responses:
- * 
  *       200:
  *         description: Array users
  *       400:
