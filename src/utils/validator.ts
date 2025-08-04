@@ -93,3 +93,29 @@ const restoration = Joi.boolean().required().messages({
 });
 export const verifyOtpValidator = Joi.object({ email:emailOtp, code:codeOtp, restoration })
 export const sendOtpValidator = Joi.object({ email:emailOtp })
+
+export const addressValidator = Joi.object({
+  title: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'Title must be a string.',
+    'string.empty': 'Title is required.',
+    'string.min': 'Title must be at least 2 characters long.',
+    'string.max': 'Title must be less than or equal to 100 characters.',
+    'any.required': 'Title is required.',
+  }),
+
+  address_line: Joi.string().min(5).max(255).required().messages({
+    'string.base': 'Address must be a string.',
+    'string.empty': 'Address is required.',
+    'string.min': 'Address must be at least 5 characters long.',
+    'string.max': 'Address must be less than or equal to 255 characters.',
+    'any.required': 'Address is required.',
+  }),
+
+  map_url: Joi.string().uri().allow(null, '').optional().messages({
+    'string.uri': 'Map URL must be a valid URI.',
+  }),
+
+  is_default: Joi.boolean().default(false).messages({
+    'boolean.base': 'is_default must be a boolean.',
+  }),
+});

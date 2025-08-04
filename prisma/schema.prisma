@@ -40,6 +40,7 @@ model Users {
   is_deleted        Boolean   @default(false)
 
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  addresses         Addresses[]
 }
 
 model Otp {
@@ -53,3 +54,19 @@ model Otp {
 
   @@index([email])
 }
+
+model Addresses {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  title        String
+  address_line String
+  map_url      String?   // optional link (nullable)
+  is_default   Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
