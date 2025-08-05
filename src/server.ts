@@ -1,10 +1,13 @@
+import { createServer } from 'node:http';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { Server } from 'socket.io';
 import { globalError } from './middlewares/globalError';
 import { serverConfig } from './config';
 import { mainRouter } from './routes/main.routes';
 import { swaggerSetup } from './utils/swagger';
+import notificationsSocketCallBack from './app/notificationsSocketCallBack';
 
 
 
@@ -19,8 +22,16 @@ app.get('/', (req, res)=> res.send('<h1>Main</h1>'));
 app.use('/api', mainRouter);
 app.use(globalError as express.ErrorRequestHandler);
 
+
+const server = createServer(app);
+const io = new Server(server);
+
+const notificationsSocket = io.of('/notifications');
+
+notificationsSocket.on('connection', notificationsSocketCallBack);
+
 const {PORT} = serverConfig;
-app.listen(PORT, () => {console.log(`Server running on port ${PORT}`);
+server.listen(PORT, () => {console.log(`Server running on port ${PORT}`);
 });
 
 
