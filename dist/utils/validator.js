@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendOtpValidator = exports.verifyOtpValidator = exports.loginValidator = exports.userValidator = void 0;
+exports.addressValidator = exports.sendOtpValidator = exports.verifyOtpValidator = exports.loginValidator = exports.userValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const codeOtpPattern = /^[1-9][0-9]{5}$/;
@@ -85,3 +85,25 @@ const restoration = joi_1.default.boolean().required().messages({
 });
 exports.verifyOtpValidator = joi_1.default.object({ email: emailOtp, code: codeOtp, restoration });
 exports.sendOtpValidator = joi_1.default.object({ email: emailOtp });
+exports.addressValidator = joi_1.default.object({
+    title: joi_1.default.string().min(2).max(100).required().messages({
+        'string.base': 'Title must be a string.',
+        'string.empty': 'Title is required.',
+        'string.min': 'Title must be at least 2 characters long.',
+        'string.max': 'Title must be less than or equal to 100 characters.',
+        'any.required': 'Title is required.',
+    }),
+    address_line: joi_1.default.string().min(5).max(255).required().messages({
+        'string.base': 'Address must be a string.',
+        'string.empty': 'Address is required.',
+        'string.min': 'Address must be at least 5 characters long.',
+        'string.max': 'Address must be less than or equal to 255 characters.',
+        'any.required': 'Address is required.',
+    }),
+    map_url: joi_1.default.string().uri().allow(null, '').optional().messages({
+        'string.uri': 'Map URL must be a valid URI.',
+    }),
+    is_default: joi_1.default.boolean().default(false).messages({
+        'boolean.base': 'is_default must be a boolean.',
+    }),
+});

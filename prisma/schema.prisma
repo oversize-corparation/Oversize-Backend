@@ -41,6 +41,7 @@ model Users {
 
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
   addresses         Addresses[]
+  notifications     Notifications[]
 }
 
 model Otp {
@@ -70,3 +71,24 @@ model Addresses {
   @@map("addresses")
 }
 
+
+
+model Notifications {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  type_id      Int
+  content      String
+  is_read      Boolean   @default(false)
+  read_at      DateTime?  
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification_types      Notification_types     @relation(fields: [type_id], references: [id], onDelete: Cascade)
+}
+
+model Notification_types {
+  id          Int      @id @default(autoincrement())
+  name        String    @unique
+  notifications Notifications[]
+}
