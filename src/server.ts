@@ -8,9 +8,7 @@ import { globalError } from './middlewares/globalError';
 import { serverConfig } from './config';
 import { mainRouter } from './routes/main.routes';
 import { swaggerSetup } from './utils/swagger';
-import notificationsSocketCallBack from './app/notificationsSocketCallBack';
-
-
+import connecting from './app/connection';
 
 const app = express();
 app.use(helmet());
@@ -26,12 +24,8 @@ app.use(globalError as express.ErrorRequestHandler);
 
 const server = createServer(app);
 const io = new Server(server);
+connecting(io);
 
-
-
-const notificationsSocket = io.of('/notifications');
-
-notificationsSocket.on('connection', (socket) => notificationsSocketCallBack(socket, notificationsSocket));
 
 const {PORT} = serverConfig;
 server.listen(PORT, () => {console.log(`Server running on port ${PORT}`);

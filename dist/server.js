@@ -13,7 +13,7 @@ const globalError_1 = require("./middlewares/globalError");
 const config_1 = require("./config");
 const main_routes_1 = require("./routes/main.routes");
 const swagger_1 = require("./utils/swagger");
-const notificationsSocketCallBack_1 = __importDefault(require("./app/notificationsSocketCallBack"));
+const connection_1 = __importDefault(require("./app/connection"));
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
@@ -26,8 +26,7 @@ app.use(express_1.default.static(node_path_1.default.join(process.cwd(), "src", 
 app.use(globalError_1.globalError);
 const server = (0, node_http_1.createServer)(app);
 const io = new socket_io_1.Server(server);
-const notificationsSocket = io.of('/notifications');
-notificationsSocket.on('connection', (socket) => (0, notificationsSocketCallBack_1.default)(socket, notificationsSocket));
+(0, connection_1.default)(io);
 const { PORT } = config_1.serverConfig;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
