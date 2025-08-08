@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -25,7 +25,7 @@ model Users {
   firstname         String
   lastname          String
   email             String    @unique
-  phone_number      String?    
+  phone_number      String?
   is_active         Boolean   @default(false)
   role_id           Int
   password          String?
@@ -39,9 +39,11 @@ model Users {
   updated_at        DateTime  @updatedAt
   is_deleted        Boolean   @default(false)
 
-  roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  addresses         Addresses[]
-  notifications     Notifications[]
+  roles         Roles           @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  addresses     Addresses[]
+  notifications Notifications[]
+  chat_rooms    ChatRooms[]
+  Messages      Messages[]
 }
 
 model Otp {
@@ -61,35 +63,92 @@ model Addresses {
   user_id      Int
   title        String
   address_line String
-  map_url      String?   // optional link (nullable)
-  is_default   Boolean   @default(false)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  map_url      String? // optional link (nullable)
+  is_default   Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
-  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("addresses")
 }
 
-
-
 model Notifications {
-  id           Int      @id @default(autoincrement())
-  user_id      Int
-  type_id      Int
-  content      String
-  to           String
-  is_read      Boolean   @default(false)
-  read_at      DateTime?  
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  type_id    Int
+  content    String
+  to         String
+  is_read    Boolean   @default(false)
+  read_at    DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  notification_types      Notification_types     @relation(fields: [type_id], references: [id], onDelete: Cascade)
+  user               Users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification_types Notification_types @relation(fields: [type_id], references: [id], onDelete: Cascade)
 }
 
 model Notification_types {
-  id          Int      @id @default(autoincrement())
-  name        String    @unique
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
   notifications Notifications[]
+}
+
+model ChatRooms {
+  id              Int          @id @default(autoincrement())
+  name            String
+  type            ChatRoomType
+  creator_id      Int
+  updated_at      DateTime     @updatedAt
+  created_at      DateTime     @default(now())
+  last_message_id Int? // optional: oxirgi xabar
+  is_active       Boolean      @default(true)
+  description     String?
+  avatar_url      String?
+
+  creator     Users      @relation(fields: [creator_id], references: [id])
+  lastMessage Messages?  @relation("LastMessage", fields: [last_message_id], references: [id])
+  messages    Messages[] @relation("RoomMessages")
+
+  @@map("chat_rooms")
+}
+
+model Messages {
+  id         Int         @id @default(autoincrement())
+  room_id    Int
+  sender_id  Int
+  message    String
+  created_at DateTime    @default(now())
+  status_id  Int
+  type       MessageType
+
+  room       ChatRooms   @relation("RoomMessages", fields: [room_id], references: [id])
+  sender     Users       @relation(fields: [sender_id], references: [id])
+  status     Statuses    @relation(fields: [status_id], references: [id])
+  lastUsedIn ChatRooms[] @relation("LastMessage")
+
+  @@map("messages")
+}
+
+model Statuses {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  messages Messages[]
+
+  @@map("statuses")
+}
+
+// ENUMS
+enum ChatRoomType {
+  private
+  group
+  channel
+}
+
+enum MessageType {
+  text
+  image
+  file
+  video
 }
