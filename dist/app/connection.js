@@ -32,6 +32,22 @@ async function connecting(io) {
             else
                 socket.emit('error', { message: 'Something went wrong' });
         });
+        socket.on('chat_send', async (data) => {
+            console.log(data);
+            const newChat = await prisma.chat.create({
+                data: {
+                    sender_id: user.user.id,
+                    receiver_id: data.receiver_id,
+                    message: data.message
+                },
+            });
+            if (newChat) {
+                socket.emit('success', { message: 'User successfully sended chat' });
+                io.to(`user:${newChat.receiver_id}`).emit('notification', { sender_id: user.user.id, message: newChat.message });
+            }
+            else
+                socket.emit('error', { message: 'Something went wrong' });
+        });
         socket.on("disconnect", () => {
             console.log(`❌ Uzildi: ${user.user.firstname}`);
         });

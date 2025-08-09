@@ -42,6 +42,8 @@ model Users {
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
   addresses         Addresses[]
   notifications     Notifications[]
+  sentMessages     Chat[] @relation("SentMessages")
+  receivedMessages Chat[] @relation("ReceivedMessages")
 }
 
 model Otp {
@@ -93,3 +95,17 @@ model Notification_types {
   name        String    @unique
   notifications Notifications[]
 }
+
+model Chat {
+  id          Int      @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
+  message     String
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  sender      Users    @relation("SentMessages", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver    Users    @relation("ReceivedMessages", fields: [receiver_id], references: [id], onDelete: Cascade)
+}
+
+

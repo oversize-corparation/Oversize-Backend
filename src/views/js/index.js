@@ -1,6 +1,7 @@
 const elFormToken = document.querySelector('.form-token');
-const elFormShow = document.querySelector('.form-show');
 const elFormNotificationCreate = document.querySelector('.form-notification_create');
+const elFormChat = document.querySelector('.form-chat_send');
+const elFormShow = document.querySelector('.form-show');
 
 let token = ''
 elFormToken.addEventListener('submit', (evt)=>{
@@ -24,26 +25,41 @@ elFormNotificationCreate.elements['data'].value = `
 }
 `
 
+elFormChat.elements['data'].value = `
+{
+    "receiver_id": 28,
+    "message": "hello my first chat"
+}
+`
+
 function executeSocket(token){
     if(token) {
-        const socketNotifications = io('/', {auth:{token}});
+        const socket = io('/', {auth:{token}});
         elFormNotificationCreate.addEventListener('submit', (evt)=>{
             evt.preventDefault();
             const formData = new FormData(evt.target);
             const data = Object.fromEntries(formData).data.trim();  
             if(!data) return 
-            socketNotifications.emit("notification_create", JSON.parse(data));
+            socket.emit("notification_create", JSON.parse(data));
         })
 
-        socketNotifications.on('notification', (data) => {
+        elFormChat.addEventListener('submit', (evt)=>{
+            evt.preventDefault();
+            const formData = new FormData(evt.target);
+            const data = Object.fromEntries(formData).data.trim(); 
+            if(!data) return 
+            socket.emit("chat_send", JSON.parse(data));
+        })
+
+        socket.on('notification', (data) => {
             elFormShow.elements['message'].value = elFormShow.elements['message'].value + `\n...notification: ${JSON.stringify(data)}` 
         })
 
-        socketNotifications.on('success', (data) => {
+        socket.on('success', (data) => {
             elFormShow.elements['message'].value = elFormShow.elements['message'].value + `\n...success: ${JSON.stringify(data)}` 
         })
 
-        socketNotifications.on('error', (data) => {
+        socket.on('error', (data) => {
             elFormShow.elements['message'].value = elFormShow.elements['message'].value + `\n...error: ${JSON.stringify(data)}` 
         })
 
