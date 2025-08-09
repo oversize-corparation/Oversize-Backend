@@ -39,9 +39,13 @@ model Users {
   updated_at        DateTime  @updatedAt
   is_deleted        Boolean   @default(false)
 
-  roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  roles Roles       @relation(fields: [role_id], references: [id], onDelete: Cascade)
   addresses         Addresses[]
   notifications     Notifications[]
+  sentMessages     Chat[] @relation("SentMessages")
+  receivedMessages Chat[] @relation("ReceivedMessages")
+  chat_rooms    ChatRooms[]
+  Messages      Messages[]
 }
 
 model Otp {
@@ -103,4 +107,63 @@ model Chat {
 
   sender      Users    @relation("SentMessages", fields: [sender_id], references: [id], onDelete: Cascade)
   receiver    Users    @relation("ReceivedMessages", fields: [receiver_id], references: [id], onDelete: Cascade)
+}
+
+model ChatRooms {
+  id              Int          @id @default(autoincrement())
+  name            String
+  type            ChatRoomType
+  creator_id      Int
+  updated_at      DateTime     @updatedAt
+  created_at      DateTime     @default(now())
+  last_message_id Int? // optional: oxirgi xabar
+  is_active       Boolean      @default(true)
+  description     String?
+  avatar_url      String?
+
+  creator     Users      @relation(fields: [creator_id], references: [id])
+  lastMessage Messages?  @relation("LastMessage", fields: [last_message_id], references: [id])
+  messages    Messages[] @relation("RoomMessages")
+
+  @@map("chat_rooms")
+}
+
+model Messages {
+  id         Int         @id @default(autoincrement())
+  room_id    Int
+  sender_id  Int
+  message    String
+  created_at DateTime    @default(now())
+  status_id  Int
+  type       MessageType
+
+  room       ChatRooms   @relation("RoomMessages", fields: [room_id], references: [id])
+  sender     Users       @relation(fields: [sender_id], references: [id])
+  status     Statuses    @relation(fields: [status_id], references: [id])
+  lastUsedIn ChatRooms[] @relation("LastMessage")
+
+  @@map("messages")
+}
+
+model Statuses {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  messages Messages[]
+
+  @@map("statuses")
+}
+
+// ENUMS
+enum ChatRoomType {
+  private
+  group
+  channel
+}
+
+enum MessageType {
+  text
+  image
+  file
+  video
 }
