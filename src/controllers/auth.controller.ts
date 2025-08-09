@@ -103,7 +103,7 @@ export default {
                 role_id: newUser.role_id,
                 user_id: newUser.id,
                 userAgent: req.headers["user-agent"],
-            })}`)
+            })}&id=${newUser.id}`)
       } else {
           if(!isExists.is_deleted){
             await prisma.users.update({
@@ -118,7 +118,7 @@ export default {
                 role_id: isExists.role_id,
                 user_id: isExists.id,
                 userAgent: req.headers["user-agent"],
-            })}`)
+            })}&id=${isExists.id}`)
           }
           else res.redirect(`http://localhost:4000/api/restoration`)
       }
@@ -267,6 +267,7 @@ export default {
       res.status(200).json({
         message: "User successfully logged in",
         status: 200,
+        id: isExists.id,
         accessToken: createToken({
           role_id: isExists.role_id,
           user_id: isExists.id,
@@ -345,6 +346,7 @@ export default {
       res.status(200).json({
         message: "User successfully logged in",
         status: 200,
+        id: user.id,
         accessToken: createToken({
           role_id: user.role_id,
           user_id: user.id,
