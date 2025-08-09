@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -25,7 +25,7 @@ model Users {
   firstname         String
   lastname          String
   email             String    @unique
-  phone_number      String?    
+  phone_number      String?
   is_active         Boolean   @default(false)
   role_id           Int
   password          String?
@@ -42,8 +42,6 @@ model Users {
   roles Roles @relation(fields: [role_id], references: [id], onDelete: Cascade)
   addresses         Addresses[]
   notifications     Notifications[]
-  sentMessages     Chat[] @relation("SentMessages")
-  receivedMessages Chat[] @relation("ReceivedMessages")
 }
 
 model Otp {
@@ -63,38 +61,37 @@ model Addresses {
   user_id      Int
   title        String
   address_line String
-  map_url      String?   // optional link (nullable)
-  is_default   Boolean   @default(false)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  map_url      String? // optional link (nullable)
+  is_default   Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
-  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("addresses")
 }
 
-
-
 model Notifications {
-  id           Int      @id @default(autoincrement())
-  user_id      Int
-  type_id      Int
-  content      String
-  to           String
-  is_read      Boolean   @default(false)
-  read_at      DateTime?  
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  type_id    Int
+  content    String
+  to         String
+  is_read    Boolean   @default(false)
+  read_at    DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  user         Users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  notification_types      Notification_types     @relation(fields: [type_id], references: [id], onDelete: Cascade)
+  user               Users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification_types Notification_types @relation(fields: [type_id], references: [id], onDelete: Cascade)
 }
 
 model Notification_types {
-  id          Int      @id @default(autoincrement())
-  name        String    @unique
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
   notifications Notifications[]
 }
+
 
 model Chat {
   id          Int      @id @default(autoincrement())
@@ -107,5 +104,3 @@ model Chat {
   sender      Users    @relation("SentMessages", fields: [sender_id], references: [id], onDelete: Cascade)
   receiver    Users    @relation("ReceivedMessages", fields: [receiver_id], references: [id], onDelete: Cascade)
 }
-
-
